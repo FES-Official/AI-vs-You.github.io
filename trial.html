@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>You vs AI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="terminal">
+      <div id="output" class="output"></div>
+
+      <!-- Decision Before Typing -->
+      <div id="decision" class="hidden">
+        <button onclick="acceptTyping()">✅ Accept</button>
+        <button onclick="declineChallenge()">❌ Decline</button>
+      </div>
+
+      <!-- Typing Challenge -->
+      <div id="challenge" class="challenge hidden">
+        <p>Type <code>override</code> 10 times!</p>
+        <input type="text" id="input" placeholder="Start typing..." autofocus />
+        <p id="countdown">Time left: <span id="timer">20</span>s</p>
+        <p id="progress">Override typed: 0 / 10</p>
+      </div>
+
+      <!-- Memory Challenge Decision -->
+      <div id="memory-decision" class="hidden">
+        <p>The AI throws you a memory challenge. Do you accept?</p>
+        <button onclick="acceptMemory()">✅ Accept</button>
+        <button onclick="declineChallenge()">❌ Decline</button>
+      </div>
+
+      <!-- Memory Challenge -->
+      <div id="memory-challenge" class="challenge hidden">
+        <p>Memorize this sequence:</p>
+        <div id="sequence" class="sequence-box"></div>
+        <input
+          type="text"
+          id="memoryInput"
+          class="hidden"
+          placeholder="Type the sequence..."
+        />
+      </div>
+
+      <!-- Boss Challenge Decision -->
+      <div id="boss-decision" class="hidden">
+        <p>The AI issues a final boss challenge. Accept it?</p>
+        <button onclick="acceptBoss()">✅ Accept</button>
+        <button onclick="declineChallenge()">❌ Decline</button>
+      </div>
+
+      <!-- Boss Challenge -->
+      <div id="boss-challenge" class="challenge hidden">
+        <p>Type this pattern exactly once:</p>
+        <div id="boss-pattern" class="sequence-box"></div>
+        <input type="text" id="bossInput" placeholder="Type it here..." />
+        <p>Time left: <span id="boss-timer">5</span>s</p>
+      </div>
+
+      <!-- Retry -->
+      <div id="retry" class="hidden">
+        <button onclick="location.reload()">🔁 Try Again</button>
+      </div>
+    </div>
+
+    <script src="Trial.js"></script>
+  </body>
+</html>
