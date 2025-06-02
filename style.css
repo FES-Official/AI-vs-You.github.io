@@ -20,8 +20,24 @@ body {
 }
 
 .output {
-  white-space: pre-line;
-  min-height: 150px;
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  overflow-y: auto;
+  max-height: 300px; /* Optional: to add scroll if content overflows vertically */
+}
+#conclusion {
+  margin-top: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.conclusion-win {
+  color: #00ff00; /* Green */
+}
+
+.conclusion-fail {
+  color: #ff4444; /* Red */
 }
 
 .hidden {
