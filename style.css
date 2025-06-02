@@ -25,6 +25,7 @@ body {
   overflow-wrap: break-word;
   overflow-y: auto;
   max-height: 300px; /* Optional: to add scroll if content overflows vertically */
+  color: aqua;
 }
 #conclusion {
   margin-top: 20px;
