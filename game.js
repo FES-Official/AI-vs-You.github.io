@@ -17,21 +17,18 @@ let overrideCount = 0;
 let timerInterval;
 let countdown = 25;
 
-function typeLine(text, callback) {
+function typeLine(text, callback, elem = el.output, speed = 40) {
   let i = 0;
   function type() {
     if (i < text.length) {
-      const char = text[i++];
-      if (char === "\n") {
-        el.output.innerHTML += "<br>";
-      } else if (char === " ") {
-        el.output.innerHTML += "&nbsp;";
-      } else {
-        el.output.innerHTML += char;
-      }
-      setTimeout(type, 25);
-    } else if (callback) callback();
+      elem.textContent += text.charAt(i);
+      i++;
+      setTimeout(type, speed);
+    } else {
+      if (callback) callback(); // Call next line when done
+    }
   }
+
   type();
 }
 

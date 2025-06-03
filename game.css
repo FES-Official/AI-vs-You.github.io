@@ -21,8 +21,7 @@ body {
 
 .output {
   white-space: pre-wrap;
-  word-break: keep-all;
-  overflow-wrap: break-word;
+
   overflow-y: auto;
   max-height: 300px; /* Optional: to add scroll if content overflows vertically */
   color: aqua;
@@ -31,7 +30,6 @@ body {
   position: absolute;
   top: 30%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.8);
   padding: 20px 40px;
   font-size: 22px;
   font-weight: bold;
