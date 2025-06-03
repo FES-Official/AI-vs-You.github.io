@@ -47,6 +47,7 @@ function declineChallenge() {
   endGame(
     "AI: As expected, a coward. You didn’t even try.\nConclusion: AI wins by default. Not today, human."
   );
+  el.decision.classList.add("hidden");
 }
 
 function acceptTyping() {
@@ -311,8 +312,6 @@ function endGame(message) {
     conclusionBox.innerText =
       "❌ Conclusion: Human performance fell short. AI supremacy inches closer.";
   }
-
-  el.retry.classList.remove("hidden");
 }
 
 // Start
