@@ -174,7 +174,7 @@ function startMemoryChallenge() {
     };
 
     el.memoryInputField.addEventListener("keydown", checkMemory);
-  }, 3000);
+  }, 2000);
 }
 
 function startNextChallenge() {
@@ -237,6 +237,13 @@ function startNextChallenge() {
       if (timeLeft <= 0) {
         clearInterval(t);
         input.disabled = true;
+        body.append(popup);
+        popup.style.color = "red";
+        popup.innerText = "Time OUT !!";
+        popup.style.borderColor = "red";
+        setTimeout(() => {
+          popup.remove();
+        }, 2000);
         endGame("AI: You ran out of time. Human cognition too slow.");
       }
     }, 1000);
@@ -253,9 +260,23 @@ function startNextChallenge() {
             .toLowerCase()
             .includes(challenge.answer.toLowerCase())
         ) {
+          body.append(popup);
+          popup.style.color = "#00ff88";
+          popup.innerText = "Correct: Answer";
+          popup.style.borderColor = "#00ff88";
+          setTimeout(() => {
+            popup.remove();
+          }, 2000);
           nextChallenge();
         } else {
           endGame("AI: Incorrect. The machine prevails.");
+          body.append(popup);
+          popup.style.color = "red";
+          popup.innerText = "Wrong: Answer";
+          popup.style.borderColor = "red";
+          setTimeout(() => {
+            popup.remove();
+          }, 2000);
         }
       }
     });
@@ -299,3 +320,35 @@ function endGame(message) {
 
 // Start
 startGame();
+
+// ----------------Restrictions-----------
+
+// document.addEventListener("contextmenu", function (e) {
+//   e.preventDefault();
+// });
+
+document.addEventListener("selectstart", function (e) {
+  e.preventDefault();
+});
+
+document.onkeydown = function (e) {
+  if (e.key === "F12") {
+    return false;
+  }
+};
+document.addEventListener("keyup", function (e) {
+  if (e.key === "PrintScreen") {
+    document.body.style.filter = "blur(10px)";
+  }
+});
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Shift") {
+    document.body.style.filter = "blur(10px)";
+  }
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "window") {
+    document.body.style.filter = "blur(10px)";
+  }
+});
