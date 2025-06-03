@@ -82,6 +82,9 @@ function startTypingChallenge() {
   el.input.addEventListener("input", handleOverride);
 }
 
+var body = document.querySelector("body");
+var popup = document.createElement("div");
+
 function handleOverride() {
   const value = el.input.value.trim().toLowerCase();
   if (value === "override") {
@@ -94,6 +97,13 @@ function handleOverride() {
     clearInterval(timerInterval);
     el.input.removeEventListener("input", handleOverride);
     el.challenge.classList.add("hidden");
+    popup.className = "popup";
+    popup.innerText = "You did IT !!";
+    popup.style.color = "#00ff88";
+    setTimeout(() => {
+      popup.remove();
+    }, 2000);
+    body.append(popup);
     nextChallenge();
   }
 }
@@ -140,9 +150,22 @@ function startMemoryChallenge() {
           el.memoryChallenge.classList.add("hidden");
           el.memoryInputField.value = "";
           el.memoryInputField.removeEventListener("keydown", checkMemory);
+          popup.innerText = "Correct: Answer";
+          popup.style.color = "#00ff88";
+          setTimeout(() => {
+            popup.remove();
+          }, 2000);
+          body.append(popup);
           nextChallenge();
         } else {
           el.memoryInputField.removeEventListener("keydown", checkMemory);
+          body.append(popup);
+          popup.style.color = "red";
+          popup.innerText = "Wrong: Answer";
+          popup.style.borderColor = "red";
+          setTimeout(() => {
+            popup.remove();
+          }, 2000);
           endGame(
             "AI: Memory failure.\nConclusion: AI outmatches human in recall."
           );
@@ -169,7 +192,7 @@ function startNextChallenge() {
       answer: "S110",
     },
     {
-      text: "AI: You enter a chamber with three levers labeled A, B, and C. Only **one lever** opens the door to escape. One lever does **nothing**. One lever **locks the door permanently** if pulled. You are allowed to **pull only one lever** — no second chances. Before pulling, a screen flashes this logic hint: - If lever A does nothing, then lever B is not the door. - If lever B opens the door, then lever C locks it. - If lever C locks the door, then lever A is the correct lever. Which lever do you pull?",
+      text: "AI: You enter a chamber with three levers labeled A, B, and C. Only **one lever** opens the door to escape. One lever does **nothing**. One lever **locks the door permanently** if pulled. You are allowed to **pull only one lever** — no second chances. Before pulling, a screen flashes this logic hint: - If lever A does nothing, then lever B is not the door. - If lever B opens the door, then lever C locks it. Which lever do you pull?",
       answer: "lever A",
     },
     {

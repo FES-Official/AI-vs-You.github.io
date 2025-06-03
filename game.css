@@ -25,6 +25,38 @@ body {
   overflow-wrap: break-word;
   overflow-y: auto;
   max-height: 300px; /* Optional: to add scroll if content overflows vertically */
+  color: aqua;
+}
+.popup {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  padding: 20px 40px;
+  font-size: 22px;
+  font-weight: bold;
+  border: 3px solid limegreen;
+  color: #ffffff;
+  border-radius: 10px;
+  background-color: black;
+  overflow: hidden;
+  z-index: 1;
+}
+.popup::before {
+  content: "";
+  position: absolute;
+  background-color: #00ff88;
+  width: 100%;
+  height: 5px;
+  bottom: 0px;
+  left: 0px;
+  z-index: 2;
+  animation: enterPopup 2s linear forwards;
+}
+@keyframes enterPopup {
+  100% {
+    width: 0px;
+  }
 }
 #conclusion {
   margin-top: 20px;
