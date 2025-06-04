@@ -8,7 +8,7 @@ const el = {
   memoryDecision: document.getElementById("memory-decision"),
   memoryChallenge: document.getElementById("memory-challenge"),
   sequence: document.getElementById("sequence"),
-  memoryInputField: document.getElementById("memoryInput"), // renamed for clarity
+  memoryInputField: document.getElementById("memoryInput"),
   retry: document.getElementById("retry"),
 };
 
@@ -16,20 +16,28 @@ let currentChallenge = 0;
 let overrideCount = 0;
 let timerInterval;
 let countdown = 25;
+const body = document.body;
 
 function typeLine(text, callback, elem = el.output, speed = 40) {
   let i = 0;
   function type() {
     if (i < text.length) {
-      elem.textContent += text.charAt(i);
+      elem.innerHTML += text.charAt(i);
       i++;
       setTimeout(type, speed);
-    } else {
-      if (callback) callback(); // Call next line when done
-    }
+    } else if (callback) callback();
   }
-
   type();
+}
+
+function showPopup(message, color = "#00ff88") {
+  const popup = document.createElement("div");
+  popup.className = "popup";
+  popup.innerText = message;
+  popup.style.color = color;
+  popup.style.borderColor = color;
+  body.appendChild(popup);
+  setTimeout(() => popup.remove(), 2000);
 }
 
 function startGame() {
@@ -61,9 +69,11 @@ function startTypingChallenge() {
   countdown = 25;
   el.progress.innerText = `Override typed: 0 / 20`;
   el.timer.innerText = countdown;
-
   el.input.value = "";
   el.input.focus();
+
+  el.input.removeEventListener("input", handleOverride); // Clean up
+  el.input.addEventListener("input", handleOverride);
 
   timerInterval = setInterval(() => {
     countdown--;
@@ -76,12 +86,7 @@ function startTypingChallenge() {
       );
     }
   }, 1000);
-
-  el.input.addEventListener("input", handleOverride);
 }
-
-var body = document.querySelector("body");
-var popup = document.createElement("div");
 
 function handleOverride() {
   const value = el.input.value.trim().toLowerCase();
@@ -90,18 +95,11 @@ function handleOverride() {
     el.input.value = "";
     el.progress.innerText = `Override typed: ${overrideCount} / 20`;
   }
-
   if (overrideCount >= 20) {
     clearInterval(timerInterval);
     el.input.removeEventListener("input", handleOverride);
     el.challenge.classList.add("hidden");
-    popup.className = "popup";
-    popup.innerText = "You did IT !!";
-    popup.style.color = "#00ff88";
-    setTimeout(() => {
-      popup.remove();
-    }, 2000);
-    body.append(popup);
+    showPopup("You did IT !!");
     nextChallenge();
   }
 }
@@ -141,36 +139,26 @@ function startMemoryChallenge() {
     el.memoryInputField.classList.remove("hidden");
     el.memoryInputField.focus();
 
-    const checkMemory = (e) => {
+    function checkMemory(e) {
       if (e.key === "Enter") {
         const userInput = el.memoryInputField.value.trim().toUpperCase();
+        el.memoryInputField.removeEventListener("keydown", checkMemory);
+        el.memoryInputField.value = "";
+
         if (userInput === sequence) {
           el.memoryChallenge.classList.add("hidden");
-          el.memoryInputField.value = "";
-          el.memoryInputField.removeEventListener("keydown", checkMemory);
-          popup.innerText = "Correct: Answer";
-          popup.style.color = "#00ff88";
-          setTimeout(() => {
-            popup.remove();
-          }, 2000);
-          body.append(popup);
+          showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
         } else {
-          el.memoryInputField.removeEventListener("keydown", checkMemory);
-          body.append(popup);
-          popup.style.color = "red";
-          popup.innerText = "Wrong: Answer";
-          popup.style.borderColor = "red";
-          setTimeout(() => {
-            popup.remove();
-          }, 2000);
+          showPopup("Wrong: Answer", "red");
           endGame(
             "AI: Memory failure.\nConclusion: AI outmatches human in recall."
           );
         }
       }
-    };
+    }
 
+    el.memoryInputField.removeEventListener("keydown", checkMemory);
     el.memoryInputField.addEventListener("keydown", checkMemory);
   }, 2000);
 }
@@ -235,13 +223,7 @@ function startNextChallenge() {
       if (timeLeft <= 0) {
         clearInterval(t);
         input.disabled = true;
-        body.append(popup);
-        popup.style.color = "red";
-        popup.innerText = "Time OUT !!";
-        popup.style.borderColor = "red";
-        setTimeout(() => {
-          popup.remove();
-        }, 2000);
+        showPopup("Time OUT !!", "red");
         endGame("AI: You ran out of time. Human cognition too slow.");
       }
     }, 1000);
@@ -252,29 +234,17 @@ function startNextChallenge() {
         clearInterval(t);
         input.disabled = true;
 
-        if (
-          input.value
-            .trim()
-            .toLowerCase()
-            .includes(challenge.answer.toLowerCase())
-        ) {
-          body.append(popup);
-          popup.style.color = "#00ff88";
-          popup.innerText = "Correct: Answer";
-          popup.style.borderColor = "#00ff88";
-          setTimeout(() => {
-            popup.remove();
-          }, 2000);
+        const isCorrect = input.value
+          .trim()
+          .toLowerCase()
+          .includes(challenge.answer.toLowerCase());
+
+        if (isCorrect) {
+          showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
         } else {
+          showPopup("Wrong: Answer", "red");
           endGame("AI: Incorrect. The machine prevails.");
-          body.append(popup);
-          popup.style.color = "red";
-          popup.innerText = "Wrong: Answer";
-          popup.style.borderColor = "red";
-          setTimeout(() => {
-            popup.remove();
-          }, 2000);
         }
       }
     });
@@ -284,67 +254,43 @@ function startNextChallenge() {
 function finalConclusion(passedAll) {
   const conclusionBox = document.getElementById("conclusion");
   conclusionBox.classList.remove("hidden");
+  conclusionBox.classList.toggle("conclusion-win", passedAll);
+  conclusionBox.classList.toggle("conclusion-fail", !passedAll);
 
-  if (passedAll) {
-    conclusionBox.classList.add("conclusion-win");
-    conclusionBox.innerText =
-      "✅ AI: You’ve completed the impossible...\nConclusion: While AI is powerful, your mind proved exceptional. Humanity still has its edge — for now.";
-  } else {
-    conclusionBox.classList.add("conclusion-fail");
-    conclusionBox.innerText =
-      "❌ AI: Challenge incomplete.\nConclusion: AI may not rule yet, but your failure shows we are close.";
-  }
+  conclusionBox.innerText = passedAll
+    ? "✅ AI: You’ve completed the impossible...\nConclusion: While AI is powerful, your mind proved exceptional. Humanity still has its edge — for now."
+    : "❌ AI: Challenge incomplete.\nConclusion: AI may not rule yet, but your failure shows we are close.";
 
   el.retry.classList.remove("hidden");
 }
 
 function endGame(message) {
-  el.output.innerText += `\n${message}`;
-
+  el.output.innerHTML += `<br>${message}`;
   const conclusionBox = document.getElementById("conclusion");
   conclusionBox.classList.remove("hidden", "conclusion-win");
   conclusionBox.classList.add("conclusion-fail");
 
-  if (message.includes("coward")) {
-    conclusionBox.innerText =
-      "❌ Conclusion: You chose not to face the challenge. AI dominates without resistance.";
-  } else {
-    conclusionBox.innerText =
-      "❌ Conclusion: Human performance fell short. AI supremacy inches closer.";
-  }
+  conclusionBox.innerText = message.includes("coward")
+    ? "❌ Conclusion: You chose not to face the challenge. AI dominates without resistance."
+    : "❌ Conclusion: Human performance fell short. AI supremacy inches closer.";
+
+  el.retry.classList.remove("hidden");
 }
 
-// Start
+// Start game
 startGame();
 
-// ----------------Restrictions-----------
-
-// document.addEventListener("contextmenu", function (e) {
-//   e.preventDefault();
-// });
-
-document.addEventListener("selectstart", function (e) {
-  e.preventDefault();
-});
-
-document.onkeydown = function (e) {
-  if (e.key === "F12") {
-    return false;
+// ---------------- Restrictions ---------------
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+document.addEventListener("selectstart", (e) => e.preventDefault());
+document.addEventListener("keydown", (e) => {
+  if (["F12", "Shift", "Meta"].includes(e.key)) {
+    document.body.style.filter = "blur(10px)";
+    e.preventDefault();
   }
-};
-document.addEventListener("keyup", function (e) {
+});
+document.addEventListener("keyup", (e) => {
   if (e.key === "PrintScreen") {
-    document.body.style.filter = "blur(10px)";
-  }
-});
-
-document.addEventListener("keydown", function (e) {
-  if (e.key === "Shift") {
-    document.body.style.filter = "blur(10px)";
-  }
-});
-document.addEventListener("keydown", function (e) {
-  if (e.key === "window") {
     document.body.style.filter = "blur(10px)";
   }
 });
