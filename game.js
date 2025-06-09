@@ -1,4 +1,4 @@
-const el = {
+by const el = {
   output: document.getElementById("output"),
   decision: document.getElementById("decision"),
   challenge: document.getElementById("challenge"),
@@ -281,7 +281,7 @@ function endGame(message) {
 startGame();
 
 // ---------------- Restrictions ---------------
-document.addEventListener("contextmenu", (e) => e.preventDefault());
+//document.addEventListener("contextmenu", (e) => e.preventDefault());
 //document.addEventListener("selectstart", (e) => e.preventDefault());
 document.addEventListener("keydown", (e) => {
   if (["F12", "Shift", "Meta"].includes(e.key)) {
