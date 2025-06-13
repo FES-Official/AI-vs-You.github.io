@@ -82,9 +82,7 @@ function startTypingChallenge() {
     if (countdown <= 0) {
       clearInterval(timerInterval);
       el.input.removeEventListener("input", handleOverride);
-      endGame(
-        "AI: Time's up. You failed.\nConclusion: Human processing speed insufficient."
-      );
+      endGame("AI: Time's up. You failed.\nConclusion: Human processing speed insufficient.");
     }
   }, 1000);
 }
@@ -107,34 +105,6 @@ function handleOverride() {
 
 function nextChallenge() {
   currentChallenge++;
-
-  // Show message after 10th challenge
-  if (currentChallenge === 11) {
-    showPopup("Now you are entering the Second part of the game.", "#ffaa00");
-
-    setTimeout(() => {
-      typeLine("\nAI: These next 5 challenges are not like before.", () => {
-        typeLine(
-          "\nAI: Each one tests your memory, attention, and precision.",
-          () => {
-            typeLine(
-              "\nAI: Blinking symbols... shifting colors... hidden spirals...",
-              () => {
-                typeLine(
-                  "\nAI: Remember correctly — or fail instantly.",
-                  () => {
-                    startAdvancedMemoryChallenge(currentChallenge - 11); // start 11th challenge
-                  }
-                );
-              }
-            );
-          }
-        );
-      });
-    }, 5000); // Delay for dramatic effect
-    return;
-  }
-
   if (currentChallenge === 1) {
     startMemoryDecision();
   } else if (currentChallenge >= 2 && currentChallenge <= 10) {
@@ -182,9 +152,7 @@ function startMemoryChallenge() {
           nextChallenge();
         } else {
           showPopup("Wrong: Answer", "red");
-          endGame(
-            "AI: Memory failure.\nConclusion: AI outmatches human in recall."
-          );
+          endGame("AI: Memory failure.\nConclusion: AI outmatches human in recall.");
         }
       }
     }
@@ -201,7 +169,7 @@ function startNextChallenge() {
       answer: "man",
     },
     {
-      text: "AI: Let’s see if your human reasoning can transcend calculation. A sealed vault opens **only** under one condition: Exactly **two** of the following statements are true — no more, no less. 1. The vault is locked. 2. The key is inside the vault. 3. If the vault is locked, then the key is not inside. 4. If the key is not inside, then the vault is not locked. Is the vault locked? Type: yes or no",
+      text: "AI: A sealed vault opens only if exactly two of the following are true: 1) The vault is locked. 2) The key is inside. 3) If locked, the key is not inside. 4) If no key, then it's not locked. Is the vault locked?",
       answer: "no",
     },
     {
@@ -209,23 +177,23 @@ function startNextChallenge() {
       answer: "S110",
     },
     {
-      text: "AI: You enter a chamber with three levers labeled A, B, and C. Only **one lever** opens the door to escape. One lever does **nothing**. One lever **locks the door permanently** if pulled. You are allowed to **pull only one lever** — no second chances. Before pulling, a screen flashes this logic hint: - If lever A does nothing, then lever B is not the door. - If lever B opens the door, then lever C locks it. Which lever do you pull?",
+      text: "AI: 3 levers: A, B, C. One opens the door, one does nothing, one locks it. Clue: If A does nothing, B is not the door. If B opens the door, then C locks it. Which do you pull?",
       answer: "lever A",
     },
     {
-      text: "AI: Let’s test raw logic. Three people — A, B, and C — are seated at a round table. Each of them either always tells the truth or always lies. A says: “B is a liar.”  B says: “C is a liar.”  C says nothing. Who is the truth-teller",
+      text: "AI: Let’s test raw logic. Three people — A, B, and C — are seated at a round table. Each of them either always tells the truth or always lies. A says: “B is a liar.”  B says: “C is a liar.”  C says nothing. Who is the truth-teller?",
       answer: "B",
     },
     {
-      text: "AI: Let’s test your ability to reason without emotion. Four cards are on the table. Each has a number on one side and a letter on the other. You see: **A**, **D**, **4**, **7**. Rule: “If a card has a vowel on one side, it must have an even number on the other.” Which cards do you need to flip to test the rule? Type your answer using letters/numbers",
+      text: "AI: Cards A, D, 4, 7. Rule: If vowel, then even number. Which cards do you flip to test the rule?",
       answer: "A and 7",
     },
     {
-      text: "AI: Let’s see if your mind can survive pure logic. Three statements are made about a locked vault: 1. If the vault is not locked, then the alarm is on. 2. If the alarm is on, the guard is awake. 3. The guard is asleep. Is the vault locked? Type: YES or NO",
+      text: "AI: Vault logic: 1) If vault not locked, alarm is on. 2) If alarm is on, guard is awake. 3) Guard is asleep. Is vault locked?",
       answer: "YES",
     },
     {
-      text: "AI: I have simulated over 10 trillion logical systems, but never solved this. There are three boxes: - One contains only statements that are true. - One contains only statements that are false. - One contains a **mix** of true and false statements. Each box has a label on the front: **Box A**: Box B is the one with only false statements. **Box B**: This box is the one with only true statements. **Box C**: Box A is the one with mixed statements. Only **one** label is telling the truth. Which box contains the mixed statements? Type: A, B, or C",
+      text: "AI: 3 boxes. One label is true. A: B is all false. B: This is all true. C: A is mixed. Which has mixed statements?",
       answer: "A",
     },
   ];
@@ -241,8 +209,7 @@ function startNextChallenge() {
     el.output.appendChild(input);
     input.focus();
 
-    let timeLeft =
-      currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
+    let timeLeft = currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
 
     const timeDisplay = document.createElement("p");
     timeDisplay.innerText = `Time left: ${timeLeft}s`;
@@ -263,10 +230,12 @@ function startNextChallenge() {
       if (e.key === "Enter") {
         clearInterval(t);
         input.disabled = true;
+
         const isCorrect = input.value
           .trim()
           .toLowerCase()
           .includes(challenge.answer.toLowerCase());
+
         if (isCorrect) {
           showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
@@ -276,54 +245,6 @@ function startNextChallenge() {
         }
       }
     });
-  });
-}
-
-function startAdvancedMemoryChallenge(index) {
-  const memorySet = [
-    {
-      description: "Shifting Colors Matrix: Remember the color layout.",
-      pattern: ["🟥", "🟩", "🟨", "🟦", "🟪"],
-    },
-    {
-      description:
-        "Infinite Mirror Sequence: Spot the difference in repeating pattern.",
-      pattern: "12341234123451234", // Break at position 13
-    },
-    {
-      description: "Shrinking Number Spiral: Track number in shrinking spiral.",
-      pattern: [9, 7, 5, 3, 1],
-    },
-    {
-      description: "Blinking Symbol Grid: Memorize order of blinking symbols.",
-      pattern: ["★", "◆", "●", "■", "✖"],
-    },
-    {
-      description:
-        "Layered Sequence Stack: Remember stacked layers in right order.",
-      pattern: ["Red-5", "Blue-B", "Green-@", "Yellow-8"],
-    },
-  ];
-
-  const challenge = memorySet[index];
-  typeLine(`\nAI: Memory Challenge – ${challenge.description}`, () => {
-    setTimeout(() => {
-      let display = Array.isArray(challenge.pattern)
-        ? challenge.pattern.join(" ")
-        : challenge.pattern;
-
-      alert(display); // Quick simulation – replace with grid/animation later
-      const answer = prompt("Enter the pattern (or key difference you saw):");
-
-      if (answer && display.includes(answer.trim())) {
-        showPopup("Correct: Answer", "#00ff88");
-        nextChallenge();
-      } else {
-        showPopup("Wrong: Answer", "red");
-        endGame("AI: Memory failed. The mind breaks under pressure.");
-        finalConclusion(true);
-      }
-    }, 1000);
   });
 }
 
@@ -355,3 +276,18 @@ function endGame(message) {
 
 // Start game
 startGame();
+
+// ---------------- Restrictions ---------------
+document.addEventListener("contextmenu", (e) => e.preventDefault());
+//document.addEventListener("selectstart", (e) => e.preventDefault());
+document.addEventListener("keydown", (e) => {
+  if (["F12", "Shift", "Meta"].includes(e.key)) {
+    document.body.style.filter = "blur(10px)";
+    e.preventDefault();
+  }
+});
+document.addEventListener("keyup", (e) => {
+  if (e.key === "PrintScreen") {
+    document.body.style.filter = "blur(10px)";
+  }
+});
