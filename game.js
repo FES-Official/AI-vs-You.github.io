@@ -10,19 +10,7 @@ const el = {
   sequence: document.getElementById("sequence"),
   memoryInputField: document.getElementById("memoryInput"),
   retry: document.getElementById("retry"),
-  acceptTypingBtn: document.getElementById("acceptTyping"), // Assuming you have these buttons
-  declineChallengeBtn: document.getElementById("declineChallenge"), // Assuming you have these buttons
-  acceptMemoryBtn: document.getElementById("acceptMemory"), // Assuming you have these buttons
 };
-
-// Check if all essential elements are present
-for (const key in el) {
-  if (el[key] === null) {
-    console.error(`Error: Element with ID '${key}' not found.`);
-    // You might want to halt game execution or provide a user-friendly error.
-    // For now, we'll just log and continue, but this could lead to runtime errors.
-  }
-}
 
 let currentChallenge = 0;
 let overrideCount = 0;
@@ -32,15 +20,12 @@ const body = document.body;
 
 function typeLine(text, callback, elem = el.output, speed = 40) {
   let i = 0;
-  elem.innerHTML = ""; // Clear previous text before typing
   function type() {
     if (i < text.length) {
       elem.innerHTML += text.charAt(i);
       i++;
       setTimeout(type, speed);
-    } else if (callback) {
-      callback();
-    }
+    } else if (callback) callback();
   }
   type();
 }
@@ -87,20 +72,16 @@ function startTypingChallenge() {
   el.input.value = "";
   el.input.focus();
 
-  // Ensure only one event listener is active at a time
   el.input.removeEventListener("input", handleOverride);
   el.input.addEventListener("input", handleOverride);
 
-  clearInterval(timerInterval); // Clear any existing timer before starting a new one
   timerInterval = setInterval(() => {
     countdown--;
     el.timer.innerText = countdown;
     if (countdown <= 0) {
       clearInterval(timerInterval);
       el.input.removeEventListener("input", handleOverride);
-      endGame(
-        "AI: Time's up. You failed.\nConclusion: Human processing speed insufficient."
-      );
+      endGame("AI: Time's up. You failed.\nConclusion: Human processing speed insufficient.");
     }
   }, 1000);
 }
@@ -109,7 +90,7 @@ function handleOverride() {
   const value = el.input.value.trim().toLowerCase();
   if (value === "override") {
     overrideCount++;
-    el.input.value = ""; // Clear input immediately after successful override
+    el.input.value = "";
     el.progress.innerText = `Override typed: ${overrideCount} / 20`;
   }
   if (overrideCount >= 20) {
@@ -123,12 +104,20 @@ function handleOverride() {
 
 function nextChallenge() {
   currentChallenge++;
+
+  // Show message after 10th challenge
+  if (currentChallenge === 11) {
+    showPopup("Now you are entering the Second part of the game.", "#ffaa00");
+  }
+
   if (currentChallenge === 1) {
     startMemoryDecision();
-  } else if (currentChallenge === 10) {
-    finalConclusion(true);
-  } else {
+  } else if (currentChallenge >= 2 && currentChallenge <= 10) {
     startNextChallenge();
+  } else if (currentChallenge >= 11 && currentChallenge <= 15) {
+    startAdvancedMemoryChallenge(currentChallenge - 11);
+  } else {
+    finalConclusion(true);
   }
 }
 
@@ -150,36 +139,32 @@ function startMemoryChallenge() {
   ).join("");
 
   el.sequence.innerText = sequence;
-  el.memoryInputField.value = ""; // Clear previous input
 
   setTimeout(() => {
     el.sequence.innerText = "";
     el.memoryInputField.classList.remove("hidden");
     el.memoryInputField.focus();
 
-    // Remove existing event listener before adding to prevent duplicates
+    function checkMemory(e) {
+      if (e.key === "Enter") {
+        const userInput = el.memoryInputField.value.trim().toUpperCase();
+        el.memoryInputField.removeEventListener("keydown", checkMemory);
+        el.memoryInputField.value = "";
+
+        if (userInput === sequence) {
+          el.memoryChallenge.classList.add("hidden");
+          showPopup("Correct: Answer", "#00ff88");
+          nextChallenge();
+        } else {
+          showPopup("Wrong: Answer", "red");
+          endGame("AI: Memory failure.\nConclusion: AI outmatches human in recall.");
+        }
+      }
+    }
+
     el.memoryInputField.removeEventListener("keydown", checkMemory);
     el.memoryInputField.addEventListener("keydown", checkMemory);
   }, 2000);
-
-  function checkMemory(e) {
-    if (e.key === "Enter") {
-      const userInput = el.memoryInputField.value.trim().toUpperCase();
-      el.memoryInputField.removeEventListener("keydown", checkMemory); // Remove after checking
-      el.memoryInputField.value = "";
-
-      if (userInput === sequence) {
-        el.memoryChallenge.classList.add("hidden");
-        showPopup("Correct: Answer", "#00ff88");
-        nextChallenge();
-      } else {
-        showPopup("Wrong: Answer", "red");
-        endGame(
-          "AI: Memory failure.\nConclusion: AI outmatches human in recall."
-        );
-      }
-    }
-  }
 }
 
 function startNextChallenge() {
@@ -189,47 +174,39 @@ function startNextChallenge() {
       answer: "man",
     },
     {
-      text: "AI: Let’s see if your human reasoning can transcend calculation. A sealed vault opens **only** under one condition: Exactly **two** of the following statements are true — no more, no less. 1. The vault is locked. 2. The key is inside the vault. 3. If the vault is locked, then the key is not inside. 4. If the key is not inside, then the vault is not locked. Is the vault locked? Type: yes or no",
+      text: "AI: A sealed vault opens only if exactly two of the following are true: 1) The vault is locked. 2) The key is inside. 3) If locked, the key is not inside. 4) If no key, then it's not locked. Is the vault locked?",
       answer: "no",
     },
     {
-      text: "AI: This is where humans shine — patterns in chaos. Sequence: A2, C6, E12, G20, I30, K42, M56, O72, Q90, ? What comes next?",
+      text: "AI: Sequence: A2, C6, E12, G20, I30, K42, M56, O72, Q90, ? What comes next?",
       answer: "S110",
     },
     {
-      text: "AI: You enter a chamber with three levers labeled A, B, and C. Only **one lever** opens the door to escape. One lever does **nothing**. One lever **locks the door permanently** if pulled. You are allowed to **pull only one lever** — no second chances. Before pulling, a screen flashes this logic hint: - If lever A does nothing, then lever B is not the door. - If lever B opens the door, then lever C locks it. Which lever do you pull?",
+      text: "AI: 3 levers: A, B, C. One opens the door, one does nothing, one locks it. Clue: If A does nothing, B is not the door. If B opens the door, then C locks it. Which do you pull?",
       answer: "lever A",
     },
     {
-      text: "AI: Three people — A, B, and C — are seated at a round table. Each of them either always tells the truth or always lies. A says: “B is a liar.”  B says: “C is a liar.”  C says nothing. Who is the truth-teller?",
+      text: "AI: Truth-tellers vs liars. A says B is a liar. B says C is a liar. C says nothing. Who tells the truth?",
       answer: "B",
     },
     {
-      text: "AI: Four cards are on the table. Each has a number on one side and a letter on the other. You see: **A**, **D**, **4**, **7**. Rule: “If a card has a vowel on one side, it must have an even number on the other.” Which cards do you need to flip to test the rule? Type your answer using letters/numbers",
+      text: "AI: Cards A, D, 4, 7. Rule: If vowel, then even number. Which cards do you flip to test the rule?",
       answer: "A and 7",
     },
     {
-      text: "AI: Three statements are made about a locked vault: 1. If the vault is not locked, then the alarm is on. 2. If the alarm is on, the guard is awake. 3. The guard is asleep. Is the vault locked? Type: YES or NO",
+      text: "AI: Vault logic: 1) If vault not locked, alarm is on. 2) If alarm is on, guard is awake. 3) Guard is asleep. Is vault locked?",
       answer: "YES",
     },
     {
-      text: "AI: I have simulated over 10 trillion logical systems, but never solved this. There are three boxes: - One contains only statements that are true. - One contains only statements that are false. - One contains a **mix** of true and false statements. Each box has a label on the front: **Box A**: Box B is the one with only false statements. **Box B**: This box is the one with only true statements. **Box C**: Box A is the one with mixed statements. Only **one** label is telling the truth. Which box contains the mixed statements? Type: A, B, or C",
+      text: "AI: 3 boxes. One label is true. A: B is all false. B: This is all true. C: A is mixed. Which has mixed statements?",
       answer: "A",
     },
   ];
 
   const challenge = hardQuestions[currentChallenge - 2];
-  if (!challenge) {
-    return finalConclusion(true); // If no more challenges, conclude as success
-  }
+  if (!challenge) return finalConclusion(true);
 
   typeLine(`\n${challenge.text}\n(Type your answer below)`, () => {
-    // Clear previous input field and timer display if they exist
-    const oldInput = el.output.querySelector("input[type='text']");
-    if (oldInput) oldInput.remove();
-    const oldTimeDisplay = el.output.querySelector("p");
-    if (oldTimeDisplay) oldTimeDisplay.remove();
-
     const input = document.createElement("input");
     input.setAttribute("type", "text");
     input.style.width = "90%";
@@ -237,38 +214,28 @@ function startNextChallenge() {
     el.output.appendChild(input);
     input.focus();
 
-    let timeLeft =
-      currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
+    let timeLeft = currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
 
     const timeDisplay = document.createElement("p");
     timeDisplay.innerText = `Time left: ${timeLeft}s`;
     el.output.appendChild(timeDisplay);
 
-    let challengeTimer; // Use a distinct variable for the challenge timer
-    clearInterval(challengeTimer); // Clear any previous challenge timer
-    challengeTimer = setInterval(() => {
+    const t = setInterval(() => {
       timeLeft--;
       timeDisplay.innerText = `Time left: ${timeLeft}s`;
       if (timeLeft <= 0) {
-        clearInterval(challengeTimer);
+        clearInterval(t);
         input.disabled = true;
         showPopup("Time OUT !!", "red");
         endGame("AI: You ran out of time. Human cognition too slow.");
       }
     }, 1000);
 
-    input.addEventListener("keydown", function handler(e) {
+    input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault();
-        clearInterval(challengeTimer);
+        clearInterval(t);
         input.disabled = true;
-        input.removeEventListener("keydown", handler); // Remove listener after use
-
-        const isCorrect = input.value
-          .trim()
-          .toLowerCase()
-          .includes(challenge.answer.toLowerCase());
-
+        const isCorrect = input.value.trim().toLowerCase().includes(challenge.answer.toLowerCase());
         if (isCorrect) {
           showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
@@ -281,12 +248,53 @@ function startNextChallenge() {
   });
 }
 
+function startAdvancedMemoryChallenge(index) {
+  const memorySet = [
+    {
+      description: "Shifting Colors Matrix: Remember the color layout.",
+      pattern: ["🟥", "🟩", "🟨", "🟦", "🟪"],
+    },
+    {
+      description: "Infinite Mirror Sequence: Spot the difference in repeating pattern.",
+      pattern: "12341234123451234", // Break at position 13
+    },
+    {
+      description: "Shrinking Number Spiral: Track number in shrinking spiral.",
+      pattern: [9, 7, 5, 3, 1],
+    },
+    {
+      description: "Blinking Symbol Grid: Memorize order of blinking symbols.",
+      pattern: ["★", "◆", "●", "■", "✖"],
+    },
+    {
+      description: "Layered Sequence Stack: Remember stacked layers in right order.",
+      pattern: ["Red-5", "Blue-B", "Green-@", "Yellow-8"],
+    },
+  ];
+
+  const challenge = memorySet[index];
+  typeLine(`\nAI: Memory Challenge – ${challenge.description}`, () => {
+    setTimeout(() => {
+      let display = Array.isArray(challenge.pattern)
+        ? challenge.pattern.join(" ")
+        : challenge.pattern;
+
+      alert(display); // Quick simulation – replace with grid/animation later
+      const answer = prompt("Enter the pattern (or key difference you saw):");
+
+      if (answer && display.includes(answer.trim())) {
+        showPopup("Correct: Answer", "#00ff88");
+        nextChallenge();
+      } else {
+        showPopup("Wrong: Answer", "red");
+        endGame("AI: Memory failed. The mind breaks under pressure.");
+      }
+    }, 1000);
+  });
+}
+
 function finalConclusion(passedAll) {
   const conclusionBox = document.getElementById("conclusion");
-  if (!conclusionBox) {
-    console.error("Error: Conclusion box element not found.");
-    return;
-  }
   conclusionBox.classList.remove("hidden");
   conclusionBox.classList.toggle("conclusion-win", passedAll);
   conclusionBox.classList.toggle("conclusion-fail", !passedAll);
@@ -296,19 +304,11 @@ function finalConclusion(passedAll) {
     : "❌ AI: Challenge incomplete.\nConclusion: AI may not rule yet, but your failure shows we are close.";
 
   el.retry.classList.remove("hidden");
-  if (el.retry) {
-    el.retry.removeEventListener("click", restartGame); // Prevent multiple listeners
-    el.retry.addEventListener("click", restartGame);
-  }
 }
 
 function endGame(message) {
   el.output.innerHTML += `<br>${message}`;
   const conclusionBox = document.getElementById("conclusion");
-  if (!conclusionBox) {
-    console.error("Error: Conclusion box element not found.");
-    return;
-  }
   conclusionBox.classList.remove("hidden", "conclusion-win");
   conclusionBox.classList.add("conclusion-fail");
 
@@ -317,69 +317,7 @@ function endGame(message) {
     : "❌ Conclusion: Human performance fell short. AI supremacy inches closer.";
 
   el.retry.classList.remove("hidden");
-  if (el.retry) {
-    el.retry.removeEventListener("click", restartGame); // Prevent multiple listeners
-    el.retry.addEventListener("click", restartGame);
-  }
-}
-
-function restartGame() {
-  // Reset game state
-  currentChallenge = 0;
-  overrideCount = 0;
-  countdown = 25;
-  clearInterval(timerInterval); // Clear any active timers
-  // Clear any dynamically added elements
-  el.output.innerHTML = "";
-  if (el.input) el.input.value = "";
-  if (el.memoryInputField) el.memoryInputField.value = "";
-
-  // Hide all challenge/decision elements
-  el.decision.classList.add("hidden");
-  el.challenge.classList.add("hidden");
-  el.memoryDecision.classList.add("hidden");
-  el.memoryChallenge.classList.add("hidden");
-  const conclusionBox = document.getElementById("conclusion");
-  if (conclusionBox) conclusionBox.classList.add("hidden");
-  if (el.retry) el.retry.classList.add("hidden");
-  if (el.output.querySelector("input[type='text']")) {
-    el.output.querySelector("input[type='text']").remove();
-  }
-  if (el.output.querySelector("p")) {
-    el.output.querySelector("p").remove();
-  }
-
-  startGame(); // Restart the game sequence
-}
-
-// Initializing event listeners for decision buttons
-// Assuming you have buttons with these IDs in your HTML
-if (el.acceptTypingBtn) {
-  el.acceptTypingBtn.addEventListener("click", acceptTyping);
-}
-if (el.declineChallengeBtn) {
-  el.declineChallengeBtn.addEventListener("click", declineChallenge);
-}
-if (el.acceptMemoryBtn) {
-  el.acceptMemoryBtn.addEventListener("click", acceptMemory);
 }
 
 // Start game
 startGame();
-
-// --- Restrictions (Consider the implications of these restrictions for user experience) ---
-document.addEventListener("contextmenu", (e) => e.preventDefault()); // Disables right-click menu
-document.addEventListener("selectstart", (e) => e.preventDefault()); // Disables text selection
-document.addEventListener("keydown", (e) => {
-  // Prevents F12 (Dev Tools), Shift, Meta (Windows/Command) keys
-  if (["F12", "Shift", "Meta"].includes(e.key)) {
-    document.body.style.filter = "blur(10px)";
-    e.preventDefault();
-  }
-});
-document.addEventListener("keyup", (e) => {
-  // Blurs screen on Print Screen
-  if (e.key === "PrintScreen") {
-    document.body.style.filter = "blur(10px)";
-  }
-});
