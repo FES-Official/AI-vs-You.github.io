@@ -18,7 +18,7 @@ let timerInterval;
 let countdown = 25;
 const body = document.body;
 
-function typeLine(text, callback, elem = el.output, speed = 40) {
+function typeLine(text, callback, elem = el.output, speed = 30) {
   let i = 0;
   function type() {
     if (i < text.length) {
@@ -56,6 +56,7 @@ function declineChallenge() {
     "AI: As expected, a coward. You didn’t even try.\nConclusion: AI wins by default. Not today, human."
   );
   el.decision.classList.add("hidden");
+  finalConclusion(false);
 }
 
 function acceptTyping() {
@@ -72,7 +73,7 @@ function startTypingChallenge() {
   el.input.value = "";
   el.input.focus();
 
-  el.input.removeEventListener("input", handleOverride); // Clean up
+  el.input.removeEventListener("input", handleOverride);
   el.input.addEventListener("input", handleOverride);
 
   timerInterval = setInterval(() => {
@@ -106,12 +107,42 @@ function handleOverride() {
 
 function nextChallenge() {
   currentChallenge++;
+
+  // Show message after 10th challenge
+  if (currentChallenge === 11) {
+    showPopup("Now you are entering the Second part of the game.", "#ffaa00");
+
+    setTimeout(() => {
+      typeLine("\nAI: These next 5 challenges are not like before.", () => {
+        typeLine(
+          "\nAI: Each one tests your memory, attention, and precision.",
+          () => {
+            typeLine(
+              "\nAI: Blinking symbols... shifting colors... hidden spirals...",
+              () => {
+                typeLine(
+                  "\nAI: Remember correctly — or fail instantly.",
+                  () => {
+                    startAdvancedMemoryChallenge(currentChallenge - 11); // start 11th challenge
+                  }
+                );
+              }
+            );
+          }
+        );
+      });
+    }, 5000); // Delay for dramatic effect
+    return;
+  }
+
   if (currentChallenge === 1) {
     startMemoryDecision();
-  } else if (currentChallenge === 10) {
-    finalConclusion(true);
-  } else {
+  } else if (currentChallenge >= 2 && currentChallenge <= 10) {
     startNextChallenge();
+  } else if (currentChallenge >= 11 && currentChallenge <= 15) {
+    startAdvancedMemoryChallenge(currentChallenge - 11);
+  } else {
+    finalConclusion(true);
   }
 }
 
@@ -174,7 +205,7 @@ function startNextChallenge() {
       answer: "no",
     },
     {
-      text: "AI: This is where humans shine — patterns in chaos. Sequence: A2, C6, E12, G20, I30, K42, M56, O72, Q90, ? What comes next?",
+      text: "AI: Sequence: A2, C6, E12, G20, I30, K42, M56, O72, Q90, ? What comes next?",
       answer: "S110",
     },
     {
@@ -182,7 +213,7 @@ function startNextChallenge() {
       answer: "lever A",
     },
     {
-      text: "AI: Let’s test raw logic. Three people — A, B, and C — are seated at a round table. Each of them either always tells the truth or always lies. A says: “B is a liar.”  B says: “C is a liar.”  C says nothing. Who is the truth-teller?",
+      text: "AI: Let’s test raw logic. Three people — A, B, and C — are seated at a round table. Each of them either always tells the truth or always lies. A says: “B is a liar.”  B says: “C is a liar.”  C says nothing. Who is the truth-teller",
       answer: "B",
     },
     {
@@ -200,7 +231,7 @@ function startNextChallenge() {
   ];
 
   const challenge = hardQuestions[currentChallenge - 2];
-  if (!challenge) return finalConclusion(true);
+  if (!challenge) return nextChallenge(true);
 
   typeLine(`\n${challenge.text}\n(Type your answer below)`, () => {
     const input = document.createElement("input");
@@ -230,15 +261,12 @@ function startNextChallenge() {
 
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
-        e.preventDefault();
         clearInterval(t);
         input.disabled = true;
-
         const isCorrect = input.value
           .trim()
           .toLowerCase()
           .includes(challenge.answer.toLowerCase());
-
         if (isCorrect) {
           showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
@@ -248,6 +276,54 @@ function startNextChallenge() {
         }
       }
     });
+  });
+}
+
+function startAdvancedMemoryChallenge(index) {
+  const memorySet = [
+    {
+      description: "Shifting Colors Matrix: Remember the color layout.",
+      pattern: ["🟥", "🟩", "🟨", "🟦", "🟪"],
+    },
+    {
+      description:
+        "Infinite Mirror Sequence: Spot the difference in repeating pattern.",
+      pattern: "12341234123451234", // Break at position 13
+    },
+    {
+      description: "Shrinking Number Spiral: Track number in shrinking spiral.",
+      pattern: [9, 7, 5, 3, 1],
+    },
+    {
+      description: "Blinking Symbol Grid: Memorize order of blinking symbols.",
+      pattern: ["★", "◆", "●", "■", "✖"],
+    },
+    {
+      description:
+        "Layered Sequence Stack: Remember stacked layers in right order.",
+      pattern: ["Red-5", "Blue-B", "Green-@", "Yellow-8"],
+    },
+  ];
+
+  const challenge = memorySet[index];
+  typeLine(`\nAI: Memory Challenge – ${challenge.description}`, () => {
+    setTimeout(() => {
+      let display = Array.isArray(challenge.pattern)
+        ? challenge.pattern.join(" ")
+        : challenge.pattern;
+
+      alert(display); // Quick simulation – replace with grid/animation later
+      const answer = prompt("Enter the pattern (or key difference you saw):");
+
+      if (answer && display.includes(answer.trim())) {
+        showPopup("Correct: Answer", "#00ff88");
+        nextChallenge();
+      } else {
+        showPopup("Wrong: Answer", "red");
+        endGame("AI: Memory failed. The mind breaks under pressure.");
+        finalConclusion(true);
+      }
+    }, 1000);
   });
 }
 
@@ -279,18 +355,3 @@ function endGame(message) {
 
 // Start game
 startGame();
-
-// ---------------- Restrictions ---------------
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-//document.addEventListener("selectstart", (e) => e.preventDefault());
-document.addEventListener("keydown", (e) => {
-  if (["F12", "Shift", "Meta"].includes(e.key)) {
-    document.body.style.filter = "blur(10px)";
-    e.preventDefault();
-  }
-});
-document.addEventListener("keyup", (e) => {
-  if (e.key === "PrintScreen") {
-    document.body.style.filter = "blur(10px)";
-  }
-});
