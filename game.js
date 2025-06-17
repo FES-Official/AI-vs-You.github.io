@@ -24,7 +24,7 @@ function typeLine(text, callback, elem = el.output, speed = 30) {
   let i = 0;
   function type() {
     if (i < text.length) {
-      elem.innerHTML += text.charAt(i);
+      elem.textContent += text.charAt(i);
       i++;
       setTimeout(type, speed);
     } else if (callback) callback();
@@ -44,19 +44,14 @@ function showPopup(message, color = "#00ff88") {
 
 function startGame() {
   typeLine("AI: You dare challenge me?\n", () => {
-    typeLine(
-      "AI: If you want control, type 'override' 20 times in 25s before I shut you down.\n",
-      () => {
-        el.decision.classList.remove("hidden");
-      }
-    );
+    typeLine("AI: If you want control, type 'override' 20 times in 25s before I shut you down.\n", () => {
+      el.decision.classList.remove("hidden");
+    });
   });
 }
 
 function declineChallenge() {
-  endGame(
-    "AI: As expected, a coward. You didn’t even try.\nConclusion: AI wins by default. Not today, human."
-  );
+  endGame("AI: As expected, a coward. You didn’t even try.\nConclusion: AI wins by default. Not today, human.");
   el.decision.classList.add("hidden");
   finalConclusion(false);
 }
@@ -84,9 +79,7 @@ function startTypingChallenge() {
     if (countdown <= 0) {
       clearInterval(timerInterval);
       el.input.removeEventListener("input", handleOverride);
-      endGame(
-        "AI: Time's up. You failed.\nConclusion: Human processing speed insufficient."
-      );
+      endGame("AI: Time's up. You failed.\nConclusion: Human processing speed insufficient.");
     }
   }, 1000);
 }
@@ -115,22 +108,13 @@ function nextChallenge() {
 
     setTimeout(() => {
       typeLine("\nAI: These next 5 challenges are not like before.", () => {
-        typeLine(
-          "\nAI: Each one tests your memory, attention, and precision.",
-          () => {
-            typeLine(
-              "\nAI: Blinking symbols... shifting colors... hidden spirals...",
-              () => {
-                typeLine(
-                  "\nAI: Remember correctly — or fail instantly.",
-                  () => {
-                    el.memoryDecision.classList.remove("hidden");
-                  }
-                );
-              }
-            );
-          }
-        );
+        typeLine("\nAI: Each one tests your memory, attention, and precision.", () => {
+          typeLine("\nAI: Blinking symbols... shifting colors... hidden spirals...", () => {
+            typeLine("\nAI: Remember correctly — or fail instantly.", () => {
+              el.memoryDecision.classList.remove("hidden");
+            });
+          });
+        });
       });
     }, 3000);
     return;
@@ -141,7 +125,7 @@ function nextChallenge() {
   } else if (currentChallenge >= 2 && currentChallenge <= 10) {
     startNextChallenge();
   } else if (currentChallenge >= 12 && currentChallenge <= 15) {
-    startAdvancedMemoryChallenge(currentChallenge - 12);
+    startAdvancedMemoryChallenge(currentChallenge - 11); // Fixed index
   } else {
     finalConclusion(true);
   }
@@ -157,7 +141,7 @@ function acceptMemory() {
   el.memoryDecision.classList.add("hidden");
 
   if (currentChallenge === 11) {
-    prepareShuffledMemorySet(); // Shuffle before second part starts
+    prepareShuffledMemorySet();
     startAdvancedMemoryChallenge(0);
   } else {
     el.memoryChallenge.classList.remove("hidden");
@@ -190,7 +174,7 @@ function prepareShuffledMemorySet() {
   ];
 
   shuffledMemorySet = originalSet
-    .map((item) => {
+    .map(item => {
       const shuffled = { ...item };
       if (Array.isArray(item.pattern)) {
         shuffled.pattern = [...item.pattern].sort(() => Math.random() - 0.5);
@@ -217,6 +201,7 @@ function startMemoryChallenge() {
         const userInput = el.memoryInputField.value.trim().toUpperCase();
         el.memoryInputField.removeEventListener("keydown", checkMemory);
         el.memoryInputField.value = "";
+        el.memoryInputField.classList.add("hidden");
 
         if (userInput === sequence) {
           el.memoryChallenge.classList.add("hidden");
@@ -224,9 +209,7 @@ function startMemoryChallenge() {
           nextChallenge();
         } else {
           showPopup("Wrong: Answer", "red");
-          endGame(
-            "AI: Memory failure.\nConclusion: AI outmatches human in recall."
-          );
+          endGame("AI: Memory failure.\nConclusion: AI outmatches human in recall.");
         }
       }
     }
@@ -283,8 +266,7 @@ function startNextChallenge() {
     el.output.appendChild(input);
     input.focus();
 
-    let timeLeft =
-      currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
+    let timeLeft = currentChallenge >= 8 ? 240 : currentChallenge >= 5 ? 180 : 60;
 
     const timeDisplay = document.createElement("p");
     timeDisplay.innerText = `Time left: ${timeLeft}s`;
@@ -301,14 +283,11 @@ function startNextChallenge() {
       }
     }, 1000);
 
-    input.addEventListener("keydown", (e) => {
+    input.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         clearInterval(t);
         input.disabled = true;
-        const isCorrect = input.value
-          .trim()
-          .toLowerCase()
-          .includes(challenge.answer.toLowerCase());
+        const isCorrect = input.value.trim().toLowerCase().includes(challenge.answer.toLowerCase());
         if (isCorrect) {
           showPopup("Correct: Answer", "#00ff88");
           nextChallenge();
