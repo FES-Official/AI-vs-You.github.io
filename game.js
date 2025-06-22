@@ -189,16 +189,10 @@ function prepareShuffledMemorySet() {
     },
   ];
 
-  shuffledMemorySet = originalSet
-    .map((item) => {
-      const shuffled = { ...item };
-      if (Array.isArray(item.pattern)) {
-        shuffled.pattern = [...item.pattern].sort(() => Math.random() - 0.5);
-      }
-      return shuffled;
-    })
-    .sort(() => Math.random() - 0.5);
+  // ✅ No shuffle at all
+  shuffledMemorySet = originalSet;
 }
+
 
 function startMemoryChallenge() {
   const sequence = Array.from({ length: 5 }, () =>
