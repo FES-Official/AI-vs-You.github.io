@@ -132,12 +132,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (currentChallenge === 1) {
-      startMemoryDecision();
-    } else if (currentChallenge >= 2 && currentChallenge <= 10) {
+    if (currentChallenge >= 2 && currentChallenge <= 10) {
       startNextChallenge();
     } else if (currentChallenge >= 12 && currentChallenge <= 15) {
       startAdvancedMemoryChallenge(currentChallenge - 12);
+    } else if (currentChallenge === 11) {
+      startMemoryDecision();
     } else if (currentChallenge >= 17 && currentChallenge <= 18) {
       startImpossibleChallenge(currentChallenge - 16);
     } else {
@@ -229,21 +229,13 @@ document.addEventListener("DOMContentLoaded", () => {
       el.memoryInputField.focus();
 
       let answered = false;
-      const timeout = setTimeout(() => {
-        if (!answered) {
-          el.memoryInputField.removeEventListener("keydown", checkMemory);
-          el.memoryChallenge.classList.add("hidden");
-          showPopup("Time OUT !!", "red");
-          endGame("AI: Memory failed. Human too slow.");
-        }
-      }, 20000);
 
-      const checkMemory = function (e) {
+      function checkMemory(e) {
         if (e.key === "Enter") {
           answered = true;
           clearTimeout(timeout);
-          const input = normalizeInput(el.memoryInputField.value);
           el.memoryInputField.removeEventListener("keydown", checkMemory);
+          const input = normalizeInput(el.memoryInputField.value);
           el.memoryInputField.value = "";
           el.memoryInputField.classList.add("hidden");
           el.memoryChallenge.classList.add("hidden");
@@ -263,9 +255,19 @@ document.addEventListener("DOMContentLoaded", () => {
             endGame("AI: Memory failed. The mind breaks under pressure.");
           }
         }
-      };
+      }
 
       el.memoryInputField.addEventListener("keydown", checkMemory);
+
+      const timeout = setTimeout(() => {
+        if (!answered) {
+          el.memoryInputField.removeEventListener("keydown", checkMemory);
+          el.memoryInputField.classList.add("hidden");
+          el.memoryChallenge.classList.add("hidden");
+          showPopup("Time OUT !!", "red");
+          endGame("AI: Memory failed. Human too slow.");
+        }
+      }, 20000);
     }, 3000);
   }
 
