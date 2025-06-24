@@ -1,5 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const el = {
+const el = {
     output: document.getElementById("output"),
     decision: document.getElementById("decision"),
     challenge: document.getElementById("challenge"),
@@ -443,4 +442,3 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   startGame();
-});
