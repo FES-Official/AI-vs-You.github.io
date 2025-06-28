@@ -117,22 +117,13 @@ document.addEventListener("DOMContentLoaded", () => {
       showPopup("Now you are entering the Second part of the game.", "#ffaa00");
       setTimeout(() => {
         typeLine("\nAI: These next 5 challenges are not like before.", () => {
-          typeLine(
-            "\nAI: Each one tests your memory, attention, and precision.",
-            () => {
-              typeLine(
-                "\nAI: Blinking symbols... shifting colors... hidden spirals...",
-                () => {
-                  typeLine(
-                    "\nAI: Remember correctly — or fail instantly.",
-                    () => {
-                      el.memoryDecision.classList.remove("hidden");
-                    }
-                  );
-                }
-              );
-            }
-          );
+          typeLine("\nAI: Each one tests your memory, attention, and precision.", () => {
+            typeLine("\nAI: Blinking symbols... shifting colors... hidden spirals...", () => {
+              typeLine("\nAI: Remember correctly — or fail instantly.", () => {
+                el.memoryDecision.classList.remove("hidden");
+              });
+            });
+          });
         });
       }, 3000);
       return;
