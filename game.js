@@ -164,16 +164,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function acceptMemory() {
-    el.memoryDecision.classList.add("hidden");
-    if (currentChallenge === 11) {
-      prepareShuffledMemorySet();
-      startAdvancedMemoryChallenge(0);
-    } else {
-      el.memoryChallenge.classList.remove("hidden");
-      startMemoryChallenge();
-    }
-  }
+  // function acceptMemory() {
+  //   el.memoryDecision.classList.add("hidden");
+  //   if (currentChallenge === 11) {
+  //     prepareShuffledMemorySet();
+  //     startAdvancedMemoryChallenge(0);
+  //   } else {
+  //     el.memoryChallenge.classList.remove("hidden");
+  //     startMemoryChallenge();
+  //   }
+  // }
 
   function prepareShuffledMemorySet() {
     shuffledMemorySet = [
