@@ -119,7 +119,7 @@ function nextChallenge() {
   }
 
   if (currentChallenge === 2) {
-    startNextChallenge();
+    startMemoryDecision();
     return;
   }
 
@@ -148,10 +148,10 @@ function nextChallenge() {
     return;
   }
 
-  if (currentChallenge === 12) {
-    startMemoryDecision();
-    return;
-  }
+  // if (currentChallenge === 12) {
+  //   startMemoryDecision();
+  //   return;
+  // }
 
   if (currentChallenge >= 3 && currentChallenge <= 10) {
     startNextChallenge();
